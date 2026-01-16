@@ -77,7 +77,6 @@
                     </div>
                 </div>
                 
-                <!-- Moved Instructions inside the header block -->
                 <div class="mt-4 p-4 bg-indigo-800/50 border border-indigo-700 rounded-lg text-sm text-indigo-100 leading-relaxed">
                     <strong>Assignment Instructions:</strong> Calculate the molar mass for the compound below. Then, use that mass to convert moles to grams and grams to moles. Show your units and labels! 
                     <br><span class="font-bold text-indigo-300 italic">IMPORTANT: Round all numerical answers to 3 decimal places. Each box is worth 1 point. Labels auto-subscript (e.g., H2O becomes H₂O).</span>
@@ -295,67 +294,81 @@
             let score = 0; let total = 0;
             const formula = toSubscript(currentProblem.formula);
 
+            // Allowed variations for units
+            const UNIT_MAP = {
+                'mol': ['mol', 'moles', 'mole'],
+                'g': ['g', 'grams', 'gram'],
+                'g/mol': ['g/mol', 'grams/mole', 'grams/mol', 'gram/mol']
+            };
+
             // Molar Mass Grading
             currentProblem.elements.forEach((el, i) => {
                 checkField(`p1-mass-${i}`, el.atomicMass);
-                checkField(`p1-mass-unit-${i}`, "g/mol");
+                checkField(`p1-mass-unit-${i}`, "g/mol", true);
                 checkField(`p1-count-${i}`, el.count);
                 checkField(`p1-total-${i}`, el.totalMass);
-                checkField(`p1-total-unit-${i}`, "g/mol");
+                checkField(`p1-total-unit-${i}`, "g/mol", true);
                 total += 5;
             });
             checkField("p1-final", currentProblem.molarMass);
-            checkField("p1-unit", "g/mol");
+            checkField("p1-unit", "g/mol", true);
             total += 2;
 
             // Part 2
             checkField("m2g-given-num", currentProblem.startMoles);
-            checkField("m2g-given-unit", "mol");
+            checkField("m2g-given-unit", "mol", true);
             checkField("m2g-given-label", formula);
             checkField("m2g-top-num", currentProblem.molarMass);
-            checkField("m2g-top-unit", "g");
+            checkField("m2g-top-unit", "g", true);
             checkField("m2g-top-label", formula);
             checkField("m2g-bot-num", 1);
-            checkField("m2g-bot-unit", "mol");
+            checkField("m2g-bot-unit", "mol", true);
             checkField("m2g-bot-label", formula);
             const p2Ans = (currentProblem.startMoles * currentProblem.molarMass).toFixed(3);
             checkField("m2g-res-num", p2Ans);
-            checkField("m2g-res-unit", "g");
+            checkField("m2g-res-unit", "g", true);
             checkField("m2g-res-label", formula);
             total += 12;
 
             // Part 3
             checkField("g2m-given-num", currentProblem.startGrams);
-            checkField("g2m-given-unit", "g");
+            checkField("g2m-given-unit", "g", true);
             checkField("g2m-given-label", formula);
             checkField("g2m-top-num", 1);
-            checkField("g2m-top-unit", "mol");
+            checkField("g2m-top-unit", "mol", true);
             checkField("g2m-top-label", formula);
             checkField("g2m-bot-num", currentProblem.molarMass);
-            checkField("g2m-bot-unit", "g");
+            checkField("g2m-bot-unit", "g", true);
             checkField("g2m-bot-label", formula);
             const p3Ans = (currentProblem.startGrams / currentProblem.molarMass).toFixed(3);
             checkField("g2m-res-num", p3Ans);
-            checkField("g2m-res-unit", "mol");
+            checkField("g2m-res-unit", "mol", true);
             checkField("g2m-res-label", formula);
             total += 12;
 
-            function checkField(id, expected) {
+            function checkField(id, expected, isUnit = false) {
                 const el = document.getElementById(id);
                 if (!el) return;
                 let val = el.value.trim().toLowerCase();
-                let exp = expected.toString().toLowerCase();
-                
-                // For numeric comparison, allow a small margin for rounding
-                if (!isNaN(val) && !isNaN(exp)) {
-                    if (Math.abs(parseFloat(val) - parseFloat(exp)) < 0.005) {
-                        el.classList.add('valid'); score++;
-                    } else {
-                        el.classList.add('invalid');
-                    }
+                let isCorrect = false;
+
+                if (isUnit) {
+                    // Check against array of allowed variations
+                    const allowed = UNIT_MAP[expected.toLowerCase()] || [expected.toLowerCase()];
+                    isCorrect = allowed.includes(val);
+                } else if (!isNaN(val) && !isNaN(expected)) {
+                    // Numeric comparison
+                    isCorrect = Math.abs(parseFloat(val) - parseFloat(expected)) < 0.005;
                 } else {
-                    if (val === exp) { el.classList.add('valid'); score++; }
-                    else { el.classList.add('invalid'); }
+                    // String comparison (label)
+                    isCorrect = (val === expected.toString().toLowerCase());
+                }
+
+                if (isCorrect) {
+                    el.classList.add('valid');
+                    score++;
+                } else {
+                    el.classList.add('invalid');
                 }
                 el.disabled = true;
             }
