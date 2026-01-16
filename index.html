@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass to Moles Activity</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Set Cambria as the primary font with serifs as fallback */
+        body {
+            font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
+        }
+
+        /* Custom styles for input validation */
+        .valid {
+            border-color: #22c55e !important; /* green-500 */
+            background-color: #f0fdf4 !important; /* green-50 */
+            color: #15803d !important; /* green-700 */
+            font-weight: bold;
+        }
+        .invalid {
+            border-color: #ef4444 !important; /* red-500 */
+            background-color: #fef2f2 !important; /* red-50 */
+            color: #b91c1c !important; /* red-700 */
+        }
+        input:disabled {
+            background-color: #f8fafc;
+            color: #64748b;
+        }
+        input, select {
+            transition: all 0.2s;
+            font-family: 'Cambria', 'Georgia', serif;
+        }
+        /* Railroad Track Grid */
+        .railroad-grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            grid-template-rows: auto auto;
+            border: 2px solid #1e293b;
+            border-radius: 0.5rem;
+            background-color: white;
+            overflow: hidden;
+        }
+        .railroad-cell {
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .railroad-border-right {
+            border-right: 2px solid #1e293b;
+        }
+        .railroad-border-bottom {
+            border-bottom: 2px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <div id="assignment-content" class="bg-slate-100 p-2"> 
+
+            <!-- Header -->
+            <div class="flex flex-col mb-6 bg-indigo-900 text-white p-6 rounded-xl shadow-lg">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
+                    <div>
+                        <h1 class="text-2xl font-bold flex items-center gap-2">
+                            <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                            Moles to Mass, Mass to Moles
+                        </h1>
+                    </div>
+                    <div id="score-card" class="hidden bg-white text-indigo-900 px-4 py-2 rounded-lg shadow-md border-2 border-indigo-200">
+                        <span class="block text-xs uppercase font-bold text-slate-500">Grade</span>
+                        <span id="final-score" class="text-2xl font-extrabold">--/--</span>
+                    </div>
+                </div>
+                
+                <!-- Moved Instructions inside the header block -->
+                <div class="mt-4 p-4 bg-indigo-800/50 border border-indigo-700 rounded-lg text-sm text-indigo-100 leading-relaxed">
+                    <strong>Assignment Instructions:</strong> Calculate the molar mass for the compound below. Then, use that mass to convert moles to grams and grams to moles. Show your units and labels! 
+                    <br><span class="font-bold text-indigo-300 italic">IMPORTANT: Round all numerical answers to 3 decimal places. Each box is worth 1 point. Labels auto-subscript (e.g., H2O becomes H₂O).</span>
+                </div>
+            </div>
+
+            <!-- Part 1: Molar Mass -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    Part 1: Calculate Molar Mass for <span id="p1-name" class="font-bold text-slate-700"></span>, <span id="p1-formula" class="text-indigo-600"></span>
+                </h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-2 text-center">Element</th>
+                                <th class="px-4 py-2 text-center">Atomic Mass</th>
+                                <th class="px-2 py-2"></th>
+                                <th class="px-4 py-2 text-center"># Atoms</th>
+                                <th class="px-2 py-2"></th>
+                                <th class="px-4 py-2 text-center">Total Mass</th>
+                            </tr>
+                        </thead>
+                        <tbody id="molar-mass-table-body">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-indigo-50 font-bold border-t border-indigo-100">
+                                <td colspan="5" class="px-4 py-3 text-right text-indigo-900 align-middle">Molar Mass:</td>
+                                <td class="px-4 py-3 align-middle text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <input type="number" id="p1-final" class="w-24 p-2 border border-slate-300 rounded outline-none text-center" placeholder="Sum">
+                                        <input type="text" id="p1-unit" class="w-20 p-2 border border-slate-300 rounded outline-none text-center" placeholder="Unit">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div id="conversions-wrapper" class="flex flex-col gap-6">
+                <!-- Part 2: Moles to Grams -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">
+                        Part 2: Convert <span id="p2-moles-val"></span> moles <span class="dynamic-formula text-indigo-600"></span> to grams
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-4 overflow-x-auto pb-2">
+                        <div class="railroad-grid shadow-sm flex-shrink-0">
+                            <div class="railroad-cell railroad-border-right railroad-border-bottom bg-slate-50">
+                                <input id="m2g-given-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="m2g-given-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="m2g-given-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                            <div class="railroad-cell railroad-border-bottom">
+                                <input id="m2g-top-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="m2g-top-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="m2g-top-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                            <div class="railroad-cell railroad-border-right bg-black"></div>
+                            <div class="railroad-cell">
+                                <input id="m2g-bot-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="m2g-bot-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="m2g-bot-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                        </div>
+                        <span class="text-2xl font-bold text-slate-400 align-middle">×</span>
+                        <span class="text-2xl font-bold text-slate-400 align-middle">=</span>
+                        <div class="flex items-center gap-2 p-3 bg-indigo-50 rounded border border-indigo-100 shadow-sm flex-shrink-0">
+                            <input id="m2g-res-num" class="w-28 p-2 text-center border rounded font-bold" placeholder="Answer">
+                            <input id="m2g-res-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                            <input id="m2g-res-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 3: Grams to Moles -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">
+                        Part 3: How many moles in <span id="p3-grams-val"></span> grams <span class="dynamic-formula text-indigo-600"></span>?
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-4 overflow-x-auto pb-2">
+                        <div class="railroad-grid shadow-sm flex-shrink-0">
+                            <div class="railroad-cell railroad-border-right railroad-border-bottom bg-slate-50">
+                                <input id="g2m-given-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="g2m-given-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="g2m-given-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                            <div class="railroad-cell railroad-border-bottom">
+                                <input id="g2m-top-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="g2m-top-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="g2m-top-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                            <div class="railroad-cell railroad-border-right bg-black"></div>
+                            <div class="railroad-cell">
+                                <input id="g2m-bot-num" class="w-24 p-2 text-center border rounded" placeholder="#">
+                                <input id="g2m-bot-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                                <input id="g2m-bot-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                            </div>
+                        </div>
+                        <span class="text-2xl font-bold text-slate-400 align-middle">×</span>
+                        <span class="text-2xl font-bold text-slate-400 align-middle">=</span>
+                        <div class="flex items-center gap-2 p-3 bg-indigo-50 rounded border border-indigo-100 shadow-sm flex-shrink-0">
+                            <input id="g2m-res-num" class="w-28 p-2 text-center border rounded font-bold" placeholder="Answer">
+                            <input id="g2m-res-unit" class="w-20 p-2 text-center border rounded" placeholder="Unit">
+                            <input id="g2m-res-label" class="formula-input w-24 p-2 text-center border rounded" placeholder="Label">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 py-8">
+            <button id="grade-btn" onclick="gradeAssignment()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-lg px-8 py-3 rounded-full font-bold shadow-lg transform transition hover:scale-105 flex items-center gap-2">
+                Check Answers & Grade
+            </button>
+            <button onclick="window.location.reload()" class="bg-slate-500 hover:bg-slate-600 text-white text-lg px-8 py-3 rounded-full font-bold shadow-lg transform transition hover:scale-105 flex items-center gap-2">
+                New Practice Problem
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const subscripts = {'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'};
+        function toSubscript(str) { return str.replace(/\d/g, d => subscripts[d]); }
+
+        const ELEMENTS = {
+            H: { name: 'Hydrogen', mass: 1.008 }, C: { name: 'Carbon', mass: 12.011 },
+            Na: { name: 'Sodium', mass: 22.990 }, K: { name: 'Potassium', mass: 39.098 },
+            Ca: { name: 'Calcium', mass: 40.078 }, Mg: { name: 'Magnesium', mass: 24.305 },
+            S: { name: 'Sulfur', mass: 32.065 }, N: { name: 'Nitrogen', mass: 14.007 },
+            O: { name: 'Oxygen', mass: 15.999 }, P: { name: 'Phosphorus', mass: 30.974 },
+            Al: { name: 'Aluminum', mass: 26.982 }, Cu: { name: 'Copper', mass: 63.546 },
+            Zn: { name: 'Zinc', mass: 65.380 }, Ag: { name: 'Silver', mass: 107.868 },
+            B: { name: 'Boron', mass: 10.811 }, I: { name: 'Iodine', mass: 126.904 }
+        };
+
+        const COMPOUNDS = [
+            { name: 'Sodium Nitrate', formula: 'NaNO3', elements: [{ sym: 'Na', count: 1 }, { sym: 'N', count: 1 }, { sym: 'O', count: 3 }] },
+            { name: 'Potassium Sulfate', formula: 'K2SO4', elements: [{ sym: 'K', count: 2 }, { sym: 'S', count: 1 }, { sym: 'O', count: 4 }] },
+            { name: 'Calcium Carbonate', formula: 'CaCO3', elements: [{ sym: 'Ca', count: 1 }, { sym: 'C', count: 1 }, { sym: 'O', count: 3 }] },
+            { name: 'Magnesium Hydroxide', formula: 'Mg(OH)2', elements: [{ sym: 'Mg', count: 1 }, { sym: 'O', count: 2 }, { sym: 'H', count: 2 }] },
+            { name: 'Aluminum Borate', formula: 'AlBO3', elements: [{ sym: 'Al', count: 1 }, { sym: 'B', count: 1 }, { sym: 'O', count: 3 }] },
+            { name: 'Copper (II) Sulfate', formula: 'CuSO4', elements: [{ sym: 'Cu', count: 1 }, { sym: 'S', count: 1 }, { sym: 'O', count: 4 }] }
+        ];
+
+        let currentProblem = null;
+
+        window.onload = function() {
+            loadNewProblem();
+            attachFormulaListeners();
+        };
+
+        function attachFormulaListeners() {
+            document.querySelectorAll('.formula-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const original = e.target.value;
+                    const sub = toSubscript(original);
+                    if (original !== sub) e.target.value = sub;
+                });
+            });
+        }
+
+        function loadNewProblem() {
+            const problem = COMPOUNDS[Math.floor(Math.random() * COMPOUNDS.length)];
+            problem.startMoles = (Math.random() * 4 + 1).toFixed(3);
+            problem.startGrams = (Math.random() * 90 + 10).toFixed(3);
+            
+            let molarMass = 0;
+            problem.elements.forEach(e => {
+                e.atomicMass = ELEMENTS[e.sym].mass;
+                e.totalMass = (e.atomicMass * e.count).toFixed(3);
+                molarMass += parseFloat(e.totalMass);
+            });
+            problem.molarMass = molarMass.toFixed(3);
+
+            renderProblem(problem);
+        }
+
+        function renderProblem(problem) {
+            currentProblem = problem;
+            const fmt = toSubscript(problem.formula);
+            document.getElementById('p1-formula').innerHTML = fmt;
+            document.getElementById('p1-name').textContent = problem.name;
+            document.querySelectorAll('.dynamic-formula').forEach(el => el.innerHTML = fmt);
+            document.getElementById('p2-moles-val').textContent = problem.startMoles;
+            document.getElementById('p3-grams-val').textContent = problem.startGrams;
+
+            const tbody = document.getElementById('molar-mass-table-body');
+            tbody.innerHTML = '';
+            problem.elements.forEach((el, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b';
+                tr.innerHTML = `
+                    <td class="px-4 py-2 font-bold text-indigo-900 text-center">${el.sym}</td>
+                    <td class="px-4 py-2"><div class="flex justify-center gap-1">
+                        <input type="number" id="p1-mass-${idx}" class="w-24 p-1 border rounded text-center" placeholder="Mass">
+                        <input type="text" id="p1-mass-unit-${idx}" class="w-14 p-1 border rounded text-center" placeholder="Unit">
+                    </div></td>
+                    <td class="text-center text-slate-400 font-bold">×</td>
+                    <td class="px-4 py-2"><input type="number" id="p1-count-${idx}" class="w-14 p-1 border rounded mx-auto block text-center" placeholder="#"></td>
+                    <td class="text-center text-slate-400 font-bold">=</td>
+                    <td class="px-4 py-2"><div class="flex justify-center gap-1">
+                        <input type="number" id="p1-total-${idx}" class="w-24 p-1 border rounded text-center" placeholder="Total">
+                        <input type="text" id="p1-total-unit-${idx}" class="w-14 p-1 border rounded text-center" placeholder="Unit">
+                    </div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function gradeAssignment() {
+            let score = 0; let total = 0;
+            const formula = toSubscript(currentProblem.formula);
+
+            // Molar Mass Grading
+            currentProblem.elements.forEach((el, i) => {
+                checkField(`p1-mass-${i}`, el.atomicMass);
+                checkField(`p1-mass-unit-${i}`, "g/mol");
+                checkField(`p1-count-${i}`, el.count);
+                checkField(`p1-total-${i}`, el.totalMass);
+                checkField(`p1-total-unit-${i}`, "g/mol");
+                total += 5;
+            });
+            checkField("p1-final", currentProblem.molarMass);
+            checkField("p1-unit", "g/mol");
+            total += 2;
+
+            // Part 2
+            checkField("m2g-given-num", currentProblem.startMoles);
+            checkField("m2g-given-unit", "mol");
+            checkField("m2g-given-label", formula);
+            checkField("m2g-top-num", currentProblem.molarMass);
+            checkField("m2g-top-unit", "g");
+            checkField("m2g-top-label", formula);
+            checkField("m2g-bot-num", 1);
+            checkField("m2g-bot-unit", "mol");
+            checkField("m2g-bot-label", formula);
+            const p2Ans = (currentProblem.startMoles * currentProblem.molarMass).toFixed(3);
+            checkField("m2g-res-num", p2Ans);
+            checkField("m2g-res-unit", "g");
+            checkField("m2g-res-label", formula);
+            total += 12;
+
+            // Part 3
+            checkField("g2m-given-num", currentProblem.startGrams);
+            checkField("g2m-given-unit", "g");
+            checkField("g2m-given-label", formula);
+            checkField("g2m-top-num", 1);
+            checkField("g2m-top-unit", "mol");
+            checkField("g2m-top-label", formula);
+            checkField("g2m-bot-num", currentProblem.molarMass);
+            checkField("g2m-bot-unit", "g");
+            checkField("g2m-bot-label", formula);
+            const p3Ans = (currentProblem.startGrams / currentProblem.molarMass).toFixed(3);
+            checkField("g2m-res-num", p3Ans);
+            checkField("g2m-res-unit", "mol");
+            checkField("g2m-res-label", formula);
+            total += 12;
+
+            function checkField(id, expected) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                let val = el.value.trim().toLowerCase();
+                let exp = expected.toString().toLowerCase();
+                
+                // For numeric comparison, allow a small margin for rounding
+                if (!isNaN(val) && !isNaN(exp)) {
+                    if (Math.abs(parseFloat(val) - parseFloat(exp)) < 0.005) {
+                        el.classList.add('valid'); score++;
+                    } else {
+                        el.classList.add('invalid');
+                    }
+                } else {
+                    if (val === exp) { el.classList.add('valid'); score++; }
+                    else { el.classList.add('invalid'); }
+                }
+                el.disabled = true;
+            }
+
+            document.getElementById('score-card').classList.remove('hidden');
+            document.getElementById('final-score').textContent = `${score}/${total}`;
+            document.getElementById('grade-btn').disabled = true;
+            document.getElementById('grade-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    </script>
+</body>
+</html>
